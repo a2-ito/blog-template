@@ -36,7 +36,6 @@ jobs:
         #  exclude_assets: '.github,themes,static,resources,content,layouts,archetypes,config.yml,.gitmodules,.hugo_build.lock,README.md'
         #  cname: a2ito.ml
 
-
       - name: Setup git repogitories
         env:
           GITHUB_IO_REPO_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
@@ -55,7 +54,7 @@ jobs:
           cp -pr ../docs .
           git config --global user.email "a2-ito@github.io"
           git config --global user.name "a2-ito"
-          git config remote.origin.url "git@github.com:a2-ito/blog-public.git"
+          git config remote.origin.url "git@github.com:a2-ito/blog-template-public.git"
           git add ./docs
           git commit -m "Deploy $GITHUB_SHA by GitHub Actions"
           git push origin main
