@@ -1,0 +1,61 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Set a branch name to trigger deployment
+  pull_request:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true  # Fetch Hugo themes (true OR recursive)
+          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.96.0'
+
+      - name: Build
+        run: hugo --minify
+
+        #      - name: Deploy
+        #        uses: peaceiris/actions-gh-pages@v3
+        #        if: ${{ github.ref == 'refs/heads/main' }}
+        #        with:
+        #          deploy_key: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+        #          external_repository: a2-ito/blog-public
+        #  publish_branch: main
+        #  publish_dir: .
+        #  exclude_assets: '.github,themes,static,resources,content,layouts,archetypes,config.yml,.gitmodules,.hugo_build.lock,README.md'
+        #  cname: a2ito.ml
+
+
+      - name: Setup git repogitories
+        env:
+          GITHUB_IO_REPO_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+        run: |
+          echo "$GITHUB_IO_REPO_DEPLOY_KEY" > ~/deploy_key.pem
+          chmod 600 ~/deploy_key.pem
+          ls -ltr ~/deploy_key.pem
+
+      - name: Deploy pages
+        env:
+          GIT_SSH_COMMAND: ssh -i ~/deploy_key.pem -o StrictHostKeyChecking=no -F /dev/null
+        run: |
+          git clone https://github.com/a2-ito/blog-public.git
+          ls -ltr
+          cd blog-public
+          cp -pr ../docs .
+          git config --global user.email "a2-ito@github.io"
+          git config --global user.name "a2-ito"
+          git config remote.origin.url "git@github.com:a2-ito/blog-public.git"
+          git add ./docs
+          git commit -m "Deploy $GITHUB_SHA by GitHub Actions"
+          git push origin main

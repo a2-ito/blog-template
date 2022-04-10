@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://a2-ito.github.io/blog-template-public/sitemap.xml
